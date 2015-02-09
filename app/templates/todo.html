@@ -1,13 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
-    <form action='/todo' method="post">
+    <form action='/addTodo' method="post">
         <input type="text" name="addTask"></input>
-        <input type="submit" value="Submit"></input>
+        <input type="submit" value="add"></input>
     </form>
+
+<!--    <form action='/deleteTodo' method="post">
+        <input type="text" name="deleteTask"></input>
+        <input type="submit" value="delete"></input>
+    </form>
+-->
+
+
     {% if todos %}
     <ul>
         {% for todo in todos %}
-        <li>{{ todo.task }}
+        <li>{{ todo.task }} <a href="/deleteTodo?indexOfTodo={{ loop.index0 }}">Delete</a>
             <div>{{ todo.comment }}</div>
         </li>
         {% endfor %}
@@ -15,4 +23,5 @@
     {% else %}
     <div>No todos</div>
     {% endif %}
+
 {% endblock %}

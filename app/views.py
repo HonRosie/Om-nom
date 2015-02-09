@@ -1,6 +1,5 @@
-from flask import render_template
+from flask import render_template, request, redirect, url_for
 from app import app
-from flask import request, redirect
 import pickle
 
 # todoList = [
@@ -11,7 +10,6 @@ import pickle
 #    'comment': 'Snickerdoodles'
 #   }
 # ]
-
 
 @app.route('/')
 def index():
@@ -25,21 +23,41 @@ def hello_world():
     return render_template('helloworld.html',
                           title="HelloWorld")
 
-@app.route('/todo', methods=['GET','POST'])
-def todos():
-
-  with open('todo', 'rb') as f:
-    todoList = pickle.load(f)
-
-  if request.method == 'POST':
+@app.route('/addTodo', methods=['POST'])
+def addTodos():
+  if request.method == 'POST':           #is this necessary?
     todo = request.form['addTask']
-    task = {'task': todo}
-    todoList.append(task)
+    if todo:
+      task = {'task': todo}
+      todoList.append(task)
+
+      with open('todo', 'wb') as f:
+        pickle.dump(todoList, f)
+  return redirect(url_for('todos'))
+
+
+@app.route('/deleteTodo', methods=['GET'])
+def deleteTodo():
+
+  print "Hello"
+  deleteNum = request.args.get('indexOfTodo')
+  if deleteNum:
+    todoList.pop(int(deleteNum))
 
     with open('todo', 'wb') as f:
       pickle.dump(todoList, f)
+  return redirect(url_for('todos'))
 
 
+@app.route('/todo')
+def todos():
   return render_template('todo.html',
                          title="Todo",
                          todos=todoList)
+
+def loadTodos():
+  with open('todo', 'rb') as f:
+    todoList = pickle.load(f)
+  return todoList
+
+todoList = loadTodos()
