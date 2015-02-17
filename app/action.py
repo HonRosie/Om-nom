@@ -12,11 +12,10 @@ class Action(object):
     doneness: boolean representing if task is done
   """
 
-  def __init__(self, description, subTasks=[], comments=None,
-               project=None, date=None, doneness=False):
+  def __init__(self, description):
     self.description = description
-    self.subTasks = subTasks
-    self.comments = comments
-    self.project = project
-    self.date = date
-    self.doneness = doneness
+    self.subTasks = []
+    self.comments = None
+    self.project = None
+    self.date = None
+    self.doneness = False

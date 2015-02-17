@@ -22,11 +22,6 @@ def addTodos():
   if task:
     task = Action(task)
     todoList.append(task)
-    print "addddddddddd//////////////////////////"
-    print task.description
-    if task.subTasks:
-      for sub in task.subTasks:
-        print sub
 
     with open('todo', 'wb') as f:
       pickle.dump(todoList, f)
@@ -38,18 +33,7 @@ def addSubTask(subTaskId):
   subTask = request.form['addSubTask']
   if subTask:
     task = todoList[int(subTaskId)]
-    print "subtask//////////////////////////////"
-    print index
-    print task.description
     task.subTasks.append(subTask)
-    for sub in task.subTasks:
-      print sub
-    print "subtask full list/////////////////"
-    for task in todoList:
-      print task.description
-      for sub in task.subTasks:
-        print sub
-
 
     with open('todo', 'wb') as f:
       pickle.dump(todoList, f)
@@ -70,10 +54,6 @@ def deleteTodo(taskId):
 #displays todos from todoList
 @app.route('/todo')
 def todos():
-  for sec in todoList:
-    print sec.description
-    for sub in sec.subTasks:
-      print sub
   return render_template('todo.html',
                          title="Todo",
                          todos=todoList)
