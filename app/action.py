@@ -14,7 +14,8 @@ class Action(object):
 
   def __init__(self, description):
     self.description = description
-    self.subTasks = []
+    self.parentId = None
+    self.subTasksId = []
     self.comments = None
     self.project = None
     self.date = None

@@ -5,13 +5,14 @@
         <input type="submit" value="add"></input>
     </form>
 
-
-<!--    {% macro displayTask(todo, taskIndex) -%}
-        <li>{{ todo.description }}<a href="/todo/{{ taskIndex }}/delete">Delete</a></li>
+    {% macro displayTask(task, id, parentId) -%}
+        <li>{{ task.description }}<a href="/todo/{{ id }}/delete">Delete</a></li>
             <ul>
-                {% if todo.subTasks %}
-                    {% for subTask in todo.subTasks %}
-                        <li>{{ subTask }}</li>
+                {% if task.subTasksId %}
+                    {% for subTaskId in task.subTasks %}
+                        <li>
+                        {{ displayTask(subTask, subTaskId, id) }}
+                        </li>
                     {% endfor %}
                 {% endif %}
 
@@ -19,43 +20,22 @@
                     <li>"Comment": {{ todo.comments }}</li>
                 {% endif %}
             </ul>
-            <form action='/todo/{{ taskIndex }}/addSubTask' method="post">
+            <form action='/todo/{{ id }}/addSubTask' method="post">
                 <input type="text" name="addSubTask"></input>
                 <input type="submit" value="Subtask"></input>
             </form>
-            <form action='/todo/{{ taskIndex }}/addComment' method="post">
+            <form action='/todo/{{ id }}/addComment' method="post">
                 <input type="text" name="addComment"></input>
                 <input type="submit" value="Comment"></input>
             </form>
         </li>
     {%- endmacro %}
--->
+
 
     {% if todos %}
     <ul>
-        {% for todo in todos %}
-<!--            {{ displayTask(todo, loop.index0) }} -->
-        <li>{{ todo.description }}<a href="/todo/{{ loop.index0 }}/delete">Delete</a></li>
-            <ul>
-                {% if todo.subTasks %}
-                    {% for subTask in todo.subTasks %}
-                    <li>{{ subTask }}</li>
-                    {% endfor %}
-                {% endif %}
-
-                {% if todos.comments %}
-                    <li>"Comment": {{ todo.comments }}</li>
-                {% endif %}
-            </ul>
-            <form action='/todo/{{ loop.index0 }}/addSubTask' method="post">
-                <input type="text" name="addSubTask"></input>
-                <input type="submit" value="Subtask"></input>
-            </form>
-            <form action='/todo/{{ loop.index0 }}/addComment' method="post">
-                <input type="text" name="addComment"></input>
-                <input type="submit" value="Comment"></input>
-            </form>
-        </li>
+        {% for id, task in todos.iteritems() %}
+            {{ displayTask(task, id, task.parentId) }}
         {% endfor %}
     </ul>
     {% else %}

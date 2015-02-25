@@ -1,7 +1,9 @@
+import pickle
+import uuid
 from flask import render_template, request, redirect, url_for
 from app import app
-import pickle
 from action import Action
+import os.path
 
 @app.route('/')
 def index():
@@ -15,59 +17,84 @@ def hello_world():
     return render_template('helloworld.html',
                           title="HelloWorld")
 
-#adds todos to todoList and saves to file
+#adds todos to taskDict and saves to file
 @app.route('/todo/add', methods=['POST'])
 def addTodos():
   task = request.form['addTask']
+  addTaskToDict(task, rootTaskId)
+  return redirect(url_for('todos'))
+
+
+# #adds subtask to tasks and saves to file
+# @app.route('/todo/<parentId>/addSubTask', methods=['POST'])
+# def addSubTask(parentId):
+#   task = request.form['addSubTask']
+#   taskId = addTaskToDict(task)
+#   if taskId != None:
+#     taskDict[parentId].subTasksId.append(taskId)
+#   print "Hello????????///////////////////////"
+#   print taskDict
+#   return redirect(url_for('todos'))
+
+def addTaskToDict(task, parentId):
+  taskIdUnique = True
+  taskId = None
+  #if there was something in the add task form field
   if task:
-    task = Action(task)
-    todoList.append(task)
+    while taskIdUnique:
+      task = Action(task)
+      task.parentId = parentId
+      taskId = str(uuid.uuid4())
+
+      #if the task does not already exist in taskDict
+      if taskId not in taskDict:
+        taskDict[taskId] = task
+        taskDict[rootTaskId].subTasksId.append(taskId)
+        taskIdUnique = False
 
     with open('todo', 'wb') as f:
-      pickle.dump(todoList, f)
-  return redirect(url_for('todos'))
+      pickle.dump(taskDict, f)
 
-#adds subtask to tasks and saves to file
-@app.route('/todo/<int:subTaskId>/addSubTask', methods=['POST'])
-def addSubTask(subTaskId):
-  subTask = request.form['addSubTask']
-  if subTask:
-    task = todoList[int(subTaskId)]
-    task.subTasks.append(subTask)
-
-    with open('todo', 'wb') as f:
-      pickle.dump(todoList, f)
-  return redirect(url_for('todos'))
+# #deletes todos when delete is clicked and saves to file
+# @app.route('/todo/<taskId>/delete', methods=['GET'])
+# def deleteTodo(taskId):
+#   if taskId:
+#     taskDict.pop(taskId)
+#     with open('todo', 'wb') as f:
+#       pickle.dump(taskDict, f)
+#   return redirect(url_for('todos'))
 
 
-#deletes todos when delete is clicked and saves to file
-@app.route('/todo/<int:taskId>/delete', methods=['GET'])
-def deleteTodo(taskId):
-  deleteNum = taskId
-  if deleteNum >= 0:
-    todoList.pop(int(deleteNum))
-
-    with open('todo', 'wb') as f:
-      pickle.dump(todoList, f)
-  return redirect(url_for('todos'))
-
-#displays todos from todoList
+#displays todos from taskDict
 @app.route('/todo')
 def todos():
+  taskIdList = taskDict[rootTaskId].subTasksId
+  taskList = {}
+  for taskId in taskIdList:
+    taskList[taskId] = taskDict[taskId]
   return render_template('todo.html',
                          title="Todo",
-                         todos=todoList)
+                         todos=taskList)
 
 
-
-
-
-#Loads todo from file into todoLIst
+#Loads todo from file into todoList
 def loadTodos():
-  #TODO need to account corrupt or missing file
+  taskDict={}
+  rootTaskId=""
 
+  #create taskDict with root node
+  if not os.path.isfile('todo'):
+    task = Action("root")
+    rootTaskId = str(uuid.uuid4())
+    taskDict[rootTaskId] = task
+    with open('todo', 'wb') as f:
+      pickle.dump(taskDict, f)
   with open('todo', 'rb') as f:
-    todoList = pickle.load(f)
-  return todoList
+    taskDict = pickle.load(f)
+  for taskId, task in taskDict.iteritems():
+    if task.description == "root":
+      rootTaskId = taskId
 
-todoList = loadTodos()
+  return taskDict, rootTaskId
+
+taskDict, rootTaskId = loadTodos()
