@@ -5,18 +5,18 @@
         <input type="submit" value="add"></input>
     </form>
 
-    {% macro displayTask(task, id, parentId) -%}
+    {% macro displayTask(id, task, parentId) -%}
         <li>{{ task.description }}<a href="/todo/{{ id }}/delete">Delete</a></li>
             <ul>
                 {% if task.subTasksId %}
-                    {% for subTaskId in task.subTasks %}
+                    {% for subTaskId in task.subTasksId %}
                         <li>
-                        {{ displayTask(subTask, subTaskId, id) }}
+                        {{ taskDict[subTaskId].description }}
                         </li>
                     {% endfor %}
                 {% endif %}
 
-                {% if todos.comments %}
+                {% if taskDict.comments %}
                     <li>"Comment": {{ todo.comments }}</li>
                 {% endif %}
             </ul>
@@ -32,10 +32,10 @@
     {%- endmacro %}
 
 
-    {% if todos %}
+    {% if tasks %}
     <ul>
-        {% for id, task in todos.iteritems() %}
-            {{ displayTask(task, id, task.parentId) }}
+        {% for id, task in tasks.iteritems() %}
+            {{ displayTask(id, task, task.parentId) }}
         {% endfor %}
     </ul>
     {% else %}

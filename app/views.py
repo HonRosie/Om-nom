@@ -25,16 +25,13 @@ def addTodos():
   return redirect(url_for('todos'))
 
 
-# #adds subtask to tasks and saves to file
-# @app.route('/todo/<parentId>/addSubTask', methods=['POST'])
-# def addSubTask(parentId):
-#   task = request.form['addSubTask']
-#   taskId = addTaskToDict(task)
-#   if taskId != None:
-#     taskDict[parentId].subTasksId.append(taskId)
-#   print "Hello????????///////////////////////"
-#   print taskDict
-#   return redirect(url_for('todos'))
+#adds subtask to tasks and saves to file
+@app.route('/todo/<parentId>/addSubTask', methods=['POST'])
+def addSubTask(parentId):
+  task = request.form['addSubTask']
+  addTaskToDict(task, parentId)
+  return redirect(url_for('todos'))
+
 
 def addTaskToDict(task, parentId):
   taskIdUnique = True
@@ -49,7 +46,7 @@ def addTaskToDict(task, parentId):
       #if the task does not already exist in taskDict
       if taskId not in taskDict:
         taskDict[taskId] = task
-        taskDict[rootTaskId].subTasksId.append(taskId)
+        taskDict[parentId].subTasksId.append(taskId)
         taskIdUnique = False
 
     with open('todo', 'wb') as f:
@@ -68,13 +65,19 @@ def addTaskToDict(task, parentId):
 #displays todos from taskDict
 @app.route('/todo')
 def todos():
+  for taskId in taskDict:
+    print taskId + ":" + taskDict[taskId].description
+    print taskDict[taskId].subTasksId
+
   taskIdList = taskDict[rootTaskId].subTasksId
   taskList = {}
   for taskId in taskIdList:
     taskList[taskId] = taskDict[taskId]
   return render_template('todo.html',
                          title="Todo",
-                         todos=taskList)
+                         taskDict = taskDict,
+                         tasks = taskList
+                        )
 
 
 #Loads todo from file into todoList
