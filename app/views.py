@@ -55,24 +55,40 @@ def addTaskToDict(task, parentId):
 #deletes todos when delete is clicked and saves to file
 @app.route('/todo/<taskId>/delete', methods=['GET'])
 def deleteTodo(taskId):
-  subTasksIds = taskDict[taskId].subTasksIds
-  if not subTasks:
-    taskDict.pop(taskId)
-  else:
-    for subId in subTasksIds:
-      deleteTodo(subId)
+  delete(taskId)
 
   with open('todo', 'wb') as f:
     pickle.dump(taskDict, f)
   return redirect(url_for('todos'))
 
+def delete(taskId):
+  subTasksIds = taskDict[taskId].subTasksId
+  print subTasksIds
+  if subTasksIds:
+    for subId in subTasksIds:
+      print "/////////////////subtaskIds//////"
+      print subTasksIds
+      print subId
+      delete(subId)
+
+  parentId = taskDict[taskId].parentId
+  taskDict[parentId].subTasksId.remove(taskId)
+  print "//////////parent subtasks///////////"
+  print taskDict[parentId].subTasksId
+  taskDict.pop(taskId)
+  print "////////////////////Task Dict///////////////"
+  for taskId in taskDict:
+    print taskId + ":" + taskDict[taskId].description
+    print taskDict[taskId].subTasksId
+
 
 #displays todos from taskDict
 @app.route('/todo')
 def todos():
-  for taskId in taskDict:
-    print taskId + ":" + taskDict[taskId].description
-    print taskDict[taskId].subTasksId
+#   print "////////////////////Task Dict///////////////"
+#   for taskId in taskDict:
+#     print taskId + ":" + taskDict[taskId].description
+#     print taskDict[taskId].subTasksId
 
   taskIdList = taskDict[rootTaskId].subTasksId
   return render_template('todo.html',
