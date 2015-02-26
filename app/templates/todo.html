@@ -11,7 +11,7 @@
                 {% if task.subTasksId %}
                     {% for subTaskId in task.subTasksId %}
                         <li>
-                        {{ taskDict[subTaskId].description }}
+                            {{ taskDict[subTaskId].description }}
                         </li>
                     {% endfor %}
                 {% endif %}
@@ -32,10 +32,10 @@
     {%- endmacro %}
 
 
-    {% if tasks %}
+    {% if taskIdList %}
     <ul>
-        {% for id, task in tasks.iteritems() %}
-            {{ displayTask(id, task, task.parentId) }}
+        {% for id in taskIdList %}
+            {{ displayTask(id, taskDict[id], taskDict[id].parentId) }}
         {% endfor %}
     </ul>
     {% else %}

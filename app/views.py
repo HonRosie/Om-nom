@@ -52,14 +52,19 @@ def addTaskToDict(task, parentId):
     with open('todo', 'wb') as f:
       pickle.dump(taskDict, f)
 
-# #deletes todos when delete is clicked and saves to file
-# @app.route('/todo/<taskId>/delete', methods=['GET'])
-# def deleteTodo(taskId):
-#   if taskId:
-#     taskDict.pop(taskId)
-#     with open('todo', 'wb') as f:
-#       pickle.dump(taskDict, f)
-#   return redirect(url_for('todos'))
+#deletes todos when delete is clicked and saves to file
+@app.route('/todo/<taskId>/delete', methods=['GET'])
+def deleteTodo(taskId):
+  subTasksIds = taskDict[taskId].subTasksIds
+  if not subTasks:
+    taskDict.pop(taskId)
+  else:
+    for subId in subTasksIds:
+      deleteTodo(subId)
+
+  with open('todo', 'wb') as f:
+    pickle.dump(taskDict, f)
+  return redirect(url_for('todos'))
 
 
 #displays todos from taskDict
@@ -70,13 +75,10 @@ def todos():
     print taskDict[taskId].subTasksId
 
   taskIdList = taskDict[rootTaskId].subTasksId
-  taskList = {}
-  for taskId in taskIdList:
-    taskList[taskId] = taskDict[taskId]
   return render_template('todo.html',
                          title="Todo",
                          taskDict = taskDict,
-                         tasks = taskList
+                         taskIdList = taskIdList
                         )
 
 
