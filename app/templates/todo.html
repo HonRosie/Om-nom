@@ -1,36 +1,34 @@
 {% extends "base.html" %}
+
+{% macro displayTask(id, task, parentId) -%}
+    <li>{{ task.description }}<a href="/todo/{{ id }}/delete">Delete</a></li>
+        <ul>
+            {% if task.subTasksId %}
+                {% for subTaskId in task.subTasksId %}
+                    {{ displayTask(subTaskId, taskDict[subTaskId], id) }}
+                {% endfor %}
+            {% endif %}
+
+            {% if taskDict.comments %}
+                <li>"Comment": {{ todo.comments }}</li>
+            {% endif %}
+        </ul>
+        <form action='/todo/{{ id }}/addSubTask' method="post">
+            <input type="text" name="addSubTask"></input>
+            <input type="submit" value="Subtask"></input>
+        </form>
+        <form action='/todo/{{ id }}/addComment' method="post">
+            <input type="text" name="addComment"></input>
+            <input type="submit" value="Comment"></input>
+        </form>
+    </li>
+{%- endmacro %}
+
 {% block content %}
     <form action='/todo/add' method="post">
         <input type="text" name="addTask"></input>
         <input type="submit" value="add"></input>
     </form>
-
-    {% macro displayTask(id, task, parentId) -%}
-        <li>{{ task.description }}<a href="/todo/{{ id }}/delete">Delete</a></li>
-            <ul>
-                {% if task.subTasksId %}
-                    {% for subTaskId in task.subTasksId %}
-                        <li>
-                            {{ taskDict[subTaskId].description }}
-                        </li>
-                    {% endfor %}
-                {% endif %}
-
-                {% if taskDict.comments %}
-                    <li>"Comment": {{ todo.comments }}</li>
-                {% endif %}
-            </ul>
-            <form action='/todo/{{ id }}/addSubTask' method="post">
-                <input type="text" name="addSubTask"></input>
-                <input type="submit" value="Subtask"></input>
-            </form>
-            <form action='/todo/{{ id }}/addComment' method="post">
-                <input type="text" name="addComment"></input>
-                <input type="submit" value="Comment"></input>
-            </form>
-        </li>
-    {%- endmacro %}
-
 
     {% if taskIdList %}
     <ul>
