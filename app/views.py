@@ -5,6 +5,8 @@ from app import app
 from action import Action
 import os.path
 
+taskDict = {}
+
 @app.route('/')
 def index():
   return render_template('index.html',
@@ -17,15 +19,38 @@ def hello_world():
     return render_template('helloworld.html',
                           title="HelloWorld")
 
+def writeToFile():
+  with open('todo', 'wb') as f:
+    pickle.dump(taskDict, f)
+
+def createTask(description, parentId, insertLoc):
+  newTask = Action(description)
+  newTask.parentId = parentId
+  newTaskId = str(uuid.uuid4())
+  if insertLoc:
+    taskDict[parentId].subTasksId.insert(insertLoc, newTaskId)
+  else:
+    taskDict[parentId].subTasksId.append(newTaskId)
+  taskDict[newTaskId] = newTask
+
 #adds todos to taskDict and saves to file
 @app.route('/todo/<taskId>/edit', methods=['POST'])
 def editTodos(taskId):
   task = request.form['editTask']
   existingTask = taskDict[taskId]
-  existingTask.description = task + "asd;lkgja;"
+  existingTask.description = task
+  taskOrder = taskDict[rootTaskId].subTasksId.index(taskId)
 
-  with open('todo', 'wb') as f:
-    pickle.dump(taskDict, f)
+  createNew = request.form['createNew']
+  if createNew == "true":
+    createTask("", rootTaskId, taskOrder + 1)
+
+  writeToFile()
+
+  print "////////////////////Task Dict///////////////"
+  for taskId in taskDict:
+    print taskId + ":" + taskDict[taskId].description
+    print taskDict[taskId].subTasksId
 
   taskIdList = taskDict[rootTaskId].subTasksId
   return render_template('taskList.html',
@@ -33,7 +58,6 @@ def editTodos(taskId):
                          taskDict = taskDict,
                          taskIdList = taskIdList
                         )
-#   return redirect(url_for('todos'))
 
 
 #adds todos to taskDict and saves to file
@@ -121,7 +145,7 @@ def todos():
 
 #Loads todo from file into todoList
 def loadTodos():
-  taskDict={}
+  global taskDict
   rootTaskId=""
 
   #create taskDict with root node
@@ -131,10 +155,7 @@ def loadTodos():
     taskDict[rootTaskId] = task
 
     #first subTask
-    defaultTask = Action("")
-    defaultTaskId = str(uuid.uuid4())
-    taskDict[rootTaskId].subTasksId.append(defaultTaskId)
-    taskDict[defaultTaskId] = defaultTask
+    createTask("", rootTaskId, None)
 
     with open('todo', 'wb') as f:
       pickle.dump(taskDict, f)
@@ -144,6 +165,6 @@ def loadTodos():
     if task.description == "root":
       rootTaskId = taskId
 
-  return taskDict, rootTaskId
+  return rootTaskId
 
-taskDict, rootTaskId = loadTodos()
+rootTaskId = loadTodos()
