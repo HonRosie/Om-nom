@@ -18,6 +18,25 @@ def hello_world():
                           title="HelloWorld")
 
 #adds todos to taskDict and saves to file
+@app.route('/todo/<taskId>/edit', methods=['POST'])
+def editTodos(taskId):
+  task = request.form['editTask']
+  existingTask = taskDict[taskId]
+  existingTask.description = task + "asd;lkgja;"
+
+  with open('todo', 'wb') as f:
+    pickle.dump(taskDict, f)
+
+  taskIdList = taskDict[rootTaskId].subTasksId
+  return render_template('taskList.html',
+                         title="Todo",
+                         taskDict = taskDict,
+                         taskIdList = taskIdList
+                        )
+#   return redirect(url_for('todos'))
+
+
+#adds todos to taskDict and saves to file
 @app.route('/todo/add', methods=['POST'])
 def addTodos():
   task = request.form['addTask']
@@ -51,6 +70,17 @@ def addTaskToDict(task, parentId):
 
     with open('todo', 'wb') as f:
       pickle.dump(taskDict, f)
+
+#add comment to task and saves to file
+@app.route('/todo/<taskId>/addComment', methods=['POST'])
+def addComment(taskId):
+  comment = request.form['addComment']
+  if comment:
+    task = taskDict[taskId]
+    task.comment.append(comment)
+    with open('todo', 'wb') as f:
+      pickle.dump(taskDict, f)
+  return redirect(url_for('todos'))
 
 #deletes todos when delete is clicked and saves to file
 @app.route('/todo/<taskId>/delete', methods=['GET'])
@@ -99,6 +129,13 @@ def loadTodos():
     task = Action("root")
     rootTaskId = str(uuid.uuid4())
     taskDict[rootTaskId] = task
+
+    #first subTask
+    defaultTask = Action("")
+    defaultTaskId = str(uuid.uuid4())
+    taskDict[rootTaskId].subTasksId.append(defaultTaskId)
+    taskDict[defaultTaskId] = defaultTask
+
     with open('todo', 'wb') as f:
       pickle.dump(taskDict, f)
   with open('todo', 'rb') as f:

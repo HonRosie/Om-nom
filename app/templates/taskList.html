@@ -1,0 +1,35 @@
+{% macro displayTask(id, task, parentId) -%}
+    <li>
+        <input type="text" value="{{ task.description }}" id="task{{ id }}" class="task" />
+        <a href="/todo/{{ id }}/delete">Delete</a>
+        {% if task.subTasksId %}
+        <ul>
+            {% for subTaskId in task.subTasksId %}
+                {{ displayTask(subTaskId, taskDict[subTaskId], id) }}
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if task.comment %}
+        <ul>
+            {% for comment in task.comment %}
+                <li>Comment: {{ comment }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <form action='/todo/{{ id }}/addSubTask' method="post">
+            <input type="text" name="addSubTask" />
+            <input type="submit" value="Subtask" />
+        </form>
+        <form action='/todo/{{ id }}/addComment' method="post">
+            <input type="text" name="addComment" />
+            <input type="submit" value="Comment" />
+        </form>
+    </li>
+{%- endmacro %}
+
+<ul id="taskList">
+    {% for id in taskIdList %}
+    {{ displayTask(id, taskDict[id], taskDict[id].parentId) }}
+    {% endfor %}
+</ul>

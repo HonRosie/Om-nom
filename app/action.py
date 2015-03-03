@@ -16,7 +16,7 @@ class Action(object):
     self.description = description
     self.parentId = None
     self.subTasksId = []
-    self.comments = None
+    self.comment = []
     self.project = None
     self.date = None
     self.doneness = False
