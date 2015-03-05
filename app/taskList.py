@@ -49,11 +49,14 @@ def editTodos(taskId):
       createTask("", parentId, taskIndex + 1)
 
     writeToFile()
+    return renderTaskList()
 
-    print "////////////////////Task Dict///////////////"
-    for taskId in taskDict:
-      print taskId + ":" + taskDict[taskId].description
-      print taskDict[taskId].subTasksId
+
+def renderTaskList():
+  print "////////////////////Task Dict///////////////"
+  for taskId in taskDict:
+    print taskId + ":" + taskDict[taskId].description
+    print taskDict[taskId].subTasksId
 
   taskIdList = taskDict[rootTaskId].subTasksId
   return render_template('taskList.html',
@@ -69,7 +72,6 @@ def addSubTask(taskId):
   #get current parent id
   parentId = taskDict[taskId].parentId
 
-
   #get id of previous element in current parent id subtask list
   prevIndex = taskDict[parentId].subTasksId.index(taskId) - 1
   if prevIndex == -1:
@@ -84,7 +86,16 @@ def addSubTask(taskId):
   taskDict[parentId].subTasksId.remove(taskId)
 
   writeToFile()
-  return redirect(url_for('todos'))
+  return renderTaskList()
+
+@app.route('/todo/<taskId>/toggleDone', methods=['POST'])
+def markDone(taskId):
+  if taskDict[taskId].doneness == True:
+    taskDict[taskId].doneness = False
+  else:
+    taskDict[taskId].doneness = True
+  writeToFile()
+  return renderTaskList()
 
 
 #adds todos to taskDict and saves to file
