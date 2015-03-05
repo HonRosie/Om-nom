@@ -23,34 +23,37 @@ def writeToFile():
   with open('todo', 'wb') as f:
     pickle.dump(taskDict, f)
 
-def createTask(description, parentId, insertLoc):
+def createTask(description, parentId, insertIndex):
   newTask = Action(description)
   newTask.parentId = parentId
   newTaskId = str(uuid.uuid4())
-  if insertLoc:
-    taskDict[parentId].subTasksId.insert(insertLoc, newTaskId)
+  if insertIndex:
+    taskDict[parentId].subTasksId.insert(insertIndex, newTaskId)
   else:
     taskDict[parentId].subTasksId.append(newTaskId)
   taskDict[newTaskId] = newTask
+
 
 #adds todos to taskDict and saves to file
 @app.route('/todo/<taskId>/edit', methods=['POST'])
 def editTodos(taskId):
   task = request.form['editTask']
-  existingTask = taskDict[taskId]
-  existingTask.description = task
-  taskOrder = taskDict[rootTaskId].subTasksId.index(taskId)
+  if task:
+    existingTask = taskDict[taskId]
+    existingTask.description = task
+    parentId = existingTask.parentId
+    taskIndex = taskDict[parentId].subTasksId.index(taskId)
 
-  createNew = request.form['createNew']
-  if createNew == "true":
-    createTask("", rootTaskId, taskOrder + 1)
+    createNew = request.form['createNew']
+    if createNew == "true":
+      createTask("", parentId, taskIndex + 1)
 
-  writeToFile()
+    writeToFile()
 
-  print "////////////////////Task Dict///////////////"
-  for taskId in taskDict:
-    print taskId + ":" + taskDict[taskId].description
-    print taskDict[taskId].subTasksId
+    print "////////////////////Task Dict///////////////"
+    for taskId in taskDict:
+      print taskId + ":" + taskDict[taskId].description
+      print taskDict[taskId].subTasksId
 
   taskIdList = taskDict[rootTaskId].subTasksId
   return render_template('taskList.html',
@@ -60,19 +63,35 @@ def editTodos(taskId):
                         )
 
 
+#adds subtask to tasks and saves to file
+@app.route('/todo/<taskId>/addSubTask', methods=['POST'])
+def addSubTask(taskId):
+  #get current parent id
+  parentId = taskDict[taskId].parentId
+
+
+  #get id of previous element in current parent id subtask list
+  prevIndex = taskDict[parentId].subTasksId.index(taskId) - 1
+  if prevIndex == -1:
+    return redirect(url_for('todos'))
+  prevId = taskDict[parentId].subTasksId[prevIndex]
+
+  #add task to prev elems subtask list
+  taskDict[prevId].subTasksId.append(taskId)
+
+  #set prev elem as new parent and remove from old parent subtask list
+  taskDict[taskId].parentId = prevId
+  taskDict[parentId].subTasksId.remove(taskId)
+
+  writeToFile()
+  return redirect(url_for('todos'))
+
+
 #adds todos to taskDict and saves to file
 @app.route('/todo/add', methods=['POST'])
 def addTodos():
   task = request.form['addTask']
   addTaskToDict(task, rootTaskId)
-  return redirect(url_for('todos'))
-
-
-#adds subtask to tasks and saves to file
-@app.route('/todo/<parentId>/addSubTask', methods=['POST'])
-def addSubTask(parentId):
-  task = request.form['addSubTask']
-  addTaskToDict(task, parentId)
   return redirect(url_for('todos'))
 
 
@@ -92,8 +111,7 @@ def addTaskToDict(task, parentId):
         taskDict[parentId].subTasksId.append(taskId)
         taskIdUnique = False
 
-    with open('todo', 'wb') as f:
-      pickle.dump(taskDict, f)
+    writeToFile()
 
 #add comment to task and saves to file
 @app.route('/todo/<taskId>/addComment', methods=['POST'])
@@ -102,8 +120,7 @@ def addComment(taskId):
   if comment:
     task = taskDict[taskId]
     task.comment.append(comment)
-    with open('todo', 'wb') as f:
-      pickle.dump(taskDict, f)
+    writeToFile()
   return redirect(url_for('todos'))
 
 #deletes todos when delete is clicked and saves to file
@@ -114,8 +131,7 @@ def deleteTodo(taskId):
 
   delete(taskId)
 
-  with open('todo', 'wb') as f:
-    pickle.dump(taskDict, f)
+  writeToFile()
   return redirect(url_for('todos'))
 
 def delete(taskId):
@@ -157,8 +173,7 @@ def loadTodos():
     #first subTask
     createTask("", rootTaskId, None)
 
-    with open('todo', 'wb') as f:
-      pickle.dump(taskDict, f)
+    writeToFile()
   with open('todo', 'rb') as f:
     taskDict = pickle.load(f)
   for taskId, task in taskDict.iteritems():

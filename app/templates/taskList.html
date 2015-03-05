@@ -17,10 +17,6 @@
             {% endfor %}
         </ul>
         {% endif %}
-        <form action='/todo/{{ id }}/addSubTask' method="post">
-            <input type="text" name="addSubTask" />
-            <input type="submit" value="Subtask" />
-        </form>
         <form action='/todo/{{ id }}/addComment' method="post">
             <input type="text" name="addComment" />
             <input type="submit" value="Comment" />
