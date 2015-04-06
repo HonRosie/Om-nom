@@ -10,3 +10,6 @@ To run the trading module:
 ```console
 python run.py
 ```
+
+##Known issues
+* If a user tries to subtask/subtask the task before pressing 'Enter', the task description will disapper upon subtasking/unsubtasking. Since the user never pressed 'Enter', the task description never gets saved before the task is subtasked/unsubtasked
