@@ -1,0 +1,28 @@
+Daily components (blog post):
+Daily actions
+Todos from projects (tagged by project?)
+What I learned
+Questions
+Answers
+
+Projects view:
+Master todo list
+  only shows incompleted ones
+Projects todos
+  Default shows incompleted todos per project
+  Can ask to see all todos for project
+  Project header displays number of incompleted todos left
+Todos get tagged as they are pulled into days
+Todos "disappear" once they are marked done
+
+
+Can still view todos, including completed, by project
+
+Way to keep maintain a list of larger questions
+
+Components to todo:
+- sub todos?
+- comments
+- project
+- date
+- doneness

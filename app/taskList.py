@@ -49,7 +49,7 @@ def editTodos(taskId):
       createTask("", parentId, taskIndex + 1)
 
     writeToFile()
-    return renderTaskList()
+  return renderTaskList()
 
 
 def renderTaskList():
@@ -75,7 +75,7 @@ def addSubTask(taskId):
   #get id of previous element in current parent id subtask list
   prevIndex = taskDict[parentId].subTasksId.index(taskId) - 1
   if prevIndex == -1:
-    return redirect(url_for('todos'))
+    return renderTaskList()
   prevId = taskDict[parentId].subTasksId[prevIndex]
 
   #add task to prev elems subtask list
@@ -88,6 +88,30 @@ def addSubTask(taskId):
   writeToFile()
   return renderTaskList()
 
+
+#unsubtask a subtask
+@app.route('/todo/<taskId>/unSubTask', methods=['POST'])
+def unSubTask(taskId):
+  task = taskDict[taskId]
+
+  #get current parent id
+  parentId = task.parentId
+  if parentId == rootTaskId:
+    return renderTaskList()
+
+  #get parent parent id
+  parentParentId = taskDict[parentId].parentId
+  indexOfParent = taskDict[parentParentId].subTasksId.index(parentId)
+
+  taskDict[parentParentId].subTasksId.insert(indexOfParent+1, taskId)
+  taskDict[parentId].subTasksId.remove(taskId)
+  task.parentId = parentParentId
+
+  writeToFile()
+  return renderTaskList()
+
+
+#Mark tasks done
 @app.route('/todo/<taskId>/toggleDone', methods=['POST'])
 def markDone(taskId):
   if taskDict[taskId].doneness == True:
@@ -98,32 +122,6 @@ def markDone(taskId):
   return renderTaskList()
 
 
-#adds todos to taskDict and saves to file
-@app.route('/todo/add', methods=['POST'])
-def addTodos():
-  task = request.form['addTask']
-  addTaskToDict(task, rootTaskId)
-  return redirect(url_for('todos'))
-
-
-def addTaskToDict(task, parentId):
-  taskIdUnique = True
-  taskId = None
-  #if there was something in the add task form field
-  if task:
-    while taskIdUnique:
-      task = Action(task)
-      task.parentId = parentId
-      taskId = str(uuid.uuid4())
-
-      #if the task does not already exist in taskDict
-      if taskId not in taskDict:
-        taskDict[taskId] = task
-        taskDict[parentId].subTasksId.append(taskId)
-        taskIdUnique = False
-
-    writeToFile()
-
 #add comment to task and saves to file
 @app.route('/todo/<taskId>/addComment', methods=['POST'])
 def addComment(taskId):
@@ -133,6 +131,7 @@ def addComment(taskId):
     task.comment.append(comment)
     writeToFile()
   return redirect(url_for('todos'))
+
 
 #deletes todos when delete is clicked and saves to file
 @app.route('/todo/<taskId>/delete', methods=['GET'])
@@ -145,12 +144,12 @@ def deleteTodo(taskId):
   writeToFile()
   return redirect(url_for('todos'))
 
+
 def delete(taskId):
   subTasksIds = taskDict[taskId].subTasksId
   if subTasksIds:
     for subId in subTasksIds:
       delete(subId)
-
   taskDict.pop(taskId)
 
 
