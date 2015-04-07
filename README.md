@@ -8,7 +8,7 @@ Continuing development for this web application is now under OmnomJS, a React an
 
 
 ##Instructions to run
-To run the trading module:
+To run Omnom:
 ```console
 python run.py
 ```
