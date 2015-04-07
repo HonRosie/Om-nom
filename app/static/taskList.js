@@ -27,7 +27,7 @@ function bindTaskEvents(){
           document.getElementById(e.target.id).focus()
         });
       }
-      else if (e.metaKey && e.keyCode == 68){
+      else if (e.ctrlKey && e.keyCode == 68){
         $.post('/todo/' + e.target.id.substring(4) + '/toggleDone', function(resp){
           replaceTaskList(resp)
         });
