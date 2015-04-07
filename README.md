@@ -16,8 +16,8 @@ python run.py
 
 ##Supported features so far
 * Task creation
-    * Clicking the 'Add' button. This will create a top level task
-    * <kbd>Enter</kbd> from any task. This will create a new task on the same level as the task you were just on.
+    * Clicking the 'Add' button. This will create a blank top level task
+    * <kbd>Enter</kbd> from any task saves the current task and creates a new blank task of the same task level you're currently at
 * Subtask creation (theoretically you can create infinity levels of subtasks)
     * <kbd>Tab</kbd> on any task to subtask
     * <kbd>Shift</kbd>+<kbd>Tab</kbd> to unsubtask something
